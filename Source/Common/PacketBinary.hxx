@@ -131,5 +131,22 @@ public:
 
         return packetC;
     }
+
+    /**
+     * This function converts a decimal number to a binary packet.
+     */
+    static bool *decToPacket(size_t dec, size_t packetSize) {
+        if (packetSize > 64)
+            throw std::runtime_error("Packet size is too large. Packet size must be less than or equal to 64.");
+        bool *packet = new bool[packetSize];
+        for (size_t i = 0; i < packetSize; i++)
+            packet[i] = 0;
+        for (size_t i = 0; i < packetSize; i++) {
+            if (dec % 2 == 1)
+                packet[packetSize - i - 1] = 1;
+            dec /= 2;
+        }
+        return packet;
+    }
 };
 }
