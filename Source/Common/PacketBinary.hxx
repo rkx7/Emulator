@@ -42,7 +42,7 @@ public:
      * @param packet The packet to convert to decimal.
      * @param packetSize The size of the packet, or bit width of the packet.
      */
-    static size_t packetToDec(bool *packet, size_t packetSize) {
+    static size_t packetToDec(const bool *packet, size_t packetSize) {
         if (packetSize > 64)
             throw std::runtime_error("Packet size is too large. Packet size must be less than or equal to 64.");
         bool *packetBigEndian = new bool[packetSize];
@@ -66,7 +66,7 @@ public:
      * @param flags The flags object to set the flags on.
      * @return The output packet.
      */
-    static bool *addBinary(bool *packetA, size_t packetASize, bool *packetB, size_t packetBSize, size_t outputPacketSize, ALUFlags *flags) {
+    static bool *addBinary(const bool *packetA, size_t packetASize, const bool *packetB, size_t packetBSize, size_t outputPacketSize, ALUFlags *flags) {
         size_t cary = 0;
         bool *packetC = new bool[outputPacketSize];
 
@@ -76,7 +76,7 @@ public:
         if (packetASize < outputPacketSize) {
             bool *packetA2 = new bool[outputPacketSize];
             for (size_t i = 0; i < outputPacketSize; i++)
-                packetA2[i] = 0;
+                packetA2[i] = false;
             for (size_t i = 0; i < packetASize; i++)
                 packetA2[outputPacketSize - i - 1] = packetA[packetASize - i - 1];
             packetA = packetA2;
@@ -85,7 +85,7 @@ public:
         if (packetBSize < outputPacketSize) {
             bool *packetB2 = new bool[outputPacketSize];
             for (size_t i = 0; i < outputPacketSize; i++)
-                packetB2[i] = 0;
+                packetB2[i] = false;
             for (size_t i = 0; i < packetBSize; i++)
                 packetB2[outputPacketSize - i - 1] = packetB[packetBSize - i - 1];
             packetB = packetB2;
@@ -97,16 +97,16 @@ public:
             size_t sum = packetA[i] + packetB[i] + cary;
 
             if (sum == 0) {
-                packetC[i] = 0;
+                packetC[i] = false;
                 cary = 0;
             } else if (sum == 1) {
-                packetC[i] = 1;
+                packetC[i] = true;
                 cary = 0;
             } else if (sum == 2) {
-                packetC[i] = 0;
+                packetC[i] = false;
                 cary = 1;
             } else if (sum == 3) {
-                packetC[i] = 1;
+                packetC[i] = true;
                 cary = 1;
             }
         }
@@ -133,10 +133,10 @@ public:
             throw std::runtime_error("Packet size is too large. Packet size must be less than or equal to 64.");
         bool *packet = new bool[packetSize];
         for (size_t i = 0; i < packetSize; i++)
-            packet[i] = 0;
+            packet[i] = false;
         for (size_t i = 0; i < packetSize; i++) {
             if (dec % 2 == 1)
-                packet[packetSize - i - 1] = 1;
+                packet[packetSize - i - 1] = true;
             dec /= 2;
         }
         return packet;
@@ -147,11 +147,10 @@ public:
      * @param packetA The first packet to compare.
      * @param packetASize The size of the first packet.
      * @param packetB The second packet to compare.
-     * @param packetBSize The size of the second packet.
      * @param flags The flags object to set the flags on.
      * @return Whether packet A is larger than packet B is.
      */
-    static bool compareBinarySize(bool *packetA, size_t packetASize, bool *packetB, size_t packetBSize, ALUFlags *flags) {
+    static bool compareBinarySize(const bool *packetA, size_t packetASize, const bool *packetB, ALUFlags *flags) {
         for (size_t i = 0; i < packetASize; i++)
             if (packetA[i] == 1 && packetB[i] == 0) {
                 flags->positive = true;
@@ -166,7 +165,7 @@ public:
     }
 
     /**
-     * This binary subtractor subtracts numbers without the 64 bit limit. The 64 limit exists on the fast conversion due
+     * This binary subtraction unit subtracts numbers without the 64 bit limit. The 64 limit exists on the fast conversion due
      * to the address bit width. This one does not write any decimal values to 64 bit variables. So this function
      * can handle binary numbers with more than 64 bit numbers.
      * @param packetA The first packet to subtract.
@@ -187,7 +186,7 @@ public:
         if (packetASize < outputPacketSize) {
             bool *packetA2 = new bool[outputPacketSize];
             for (size_t i = 0; i < outputPacketSize; i++)
-                packetA2[i] = 0;
+                packetA2[i] = false;
             for (size_t i = 0; i < packetASize; i++)
                 packetA2[outputPacketSize - i - 1] = packetA[packetASize - i - 1];
             packetA = packetA2;
@@ -196,7 +195,7 @@ public:
         if (packetBSize < outputPacketSize) {
             bool *packetB2 = new bool[outputPacketSize];
             for (size_t i = 0; i < outputPacketSize; i++)
-                packetB2[i] = 0;
+                packetB2[i] = false;
             for (size_t i = 0; i < packetBSize; i++)
                 packetB2[outputPacketSize - i - 1] = packetB[packetBSize - i - 1];
             packetB = packetB2;
@@ -208,16 +207,16 @@ public:
             size_t sum = packetA[i] - packetB[i] - cary;
 
             if (sum == 0) {
-                packetC[i] = 0;
+                packetC[i] = false;
                 cary = 0;
             } else if (sum == 1) {
-                packetC[i] = 1;
+                packetC[i] = true;
                 cary = 0;
             } else if (sum == 2) {
-                packetC[i] = 0;
+                packetC[i] = false;
                 cary = 1;
             } else if (sum == 3) {
-                packetC[i] = 1;
+                packetC[i] = true;
                 cary = 1;
             }
         }
@@ -229,7 +228,7 @@ public:
             if (packetC[i] == 1) allZero = false;
         if (allZero) flags->zero = true;
 
-        bool largerPacket = compareBinarySize(packetA, packetASize, packetB, packetBSize, flags);
+        bool largerPacket = compareBinarySize(packetA, packetASize, packetB, flags);
         if (largerPacket) flags->positive = true;
         else flags->negative = true;
         return packetC;
